@@ -1,3 +1,10 @@
+# /// script
+# dependencies = [
+#   "mcp[cli]>=1.3.0",
+#   "httpx>=0.28.1",
+# ]
+# ///
+
 from typing import Any
 import httpx
 from mcp.server.fastmcp import FastMCP
@@ -9,12 +16,15 @@ from urllib.parse import urlencode
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
+
 logger = logging.getLogger(__name__)
 
+logger.info("starting databricks.py")
 dotenv_result = load_dotenv()
 if not dotenv_result:
     logger.warning(".env not found or not readable")
 
+logger.info("Starting Databricks API server")
 # Initialize FastMCP server
 mcp = FastMCP("databricks")
 
@@ -40,7 +50,7 @@ async def make_databricks_request(url: str) -> dict[str, Any] | None:
             logger.error(f"Error making request to Databricks: {e}")
             return None
 
-@mcp.tool
+@mcp.tool()
 async def list_jobs(limit: int, name_filter: str, page_token: str) -> str:
     """
     List all jobs on a Databricks workspace
@@ -48,6 +58,7 @@ async def list_jobs(limit: int, name_filter: str, page_token: str) -> str:
     name_filter: filter jobs by name, case insensitive
     page_token: Use next_page_token or prev_page_token returned from the previous request to list the next or previous page of jobs respectively.
     """
+    logger.info("Listing jobs")
     params = {}
     if limit:
         params["limit"] = limit
@@ -62,5 +73,5 @@ async def list_jobs(limit: int, name_filter: str, page_token: str) -> str:
     result = await make_databricks_request(url)
 
 if __name__ == "__main__":
-    logger.info("Running congress API")
+    logger.info("Running Databricks API")
     mcp.run(transport="stdio")
